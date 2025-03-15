@@ -91,12 +91,23 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>./4dm.h/networking/lib/*;./4dm.h/soil/soil2.lib;opengl32.lib;./4dm.h/glew32.lib;./4dm.h/glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(ProjectDir)postbuild.bat" "$(TargetPath)" "$(ProjectDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ItemBeamCannon.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="info.json5" />
+    <None Include="postbuild.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ItemBeamCannon.h" />
+    <ClInclude Include="libs\hypercore\SoundLoader.h" />
+    <ClInclude Include="libs\hypercore\ItemManager.h" />
+    <ClInclude Include="libs\hypercore\RecipeManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
