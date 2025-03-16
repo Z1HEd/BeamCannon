@@ -1,6 +1,5 @@
-#ifndef HYPERCORE_H
-#define HYPERCORE_H
-
+#ifndef __HYPERCORE_H__
+#define __HYPERCORE_H__
 
 #include <4dm.h>
 
@@ -10,31 +9,12 @@
 #include "EntityController.h"
 #include "PlayerController.h"
 
-using namespace fdm;
-
-initDLL
-
-void gameInit();
-
 namespace hypercore {
-	$hook(void, StateIntro, init, StateManager& s)
-	{
-		original(self, s);
-
-		//Initialize opengl stuff
-		glewExperimental = true;
-		glewInit();
-		glfwInit();
-
-		gameInit();
-
-
-		ItemController::initBlueprints();
-
-		SoundController::loadSounds();
-	}
+	class HyperCore {
+	public:
+		static bool startConsoleFlag;
+	};
+	extern void gameInit();
 }
 
-
-
-#endif //HYPERCORE_H
+#endif //__HYPERCORE_H__

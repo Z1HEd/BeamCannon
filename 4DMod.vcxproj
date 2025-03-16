@@ -97,7 +97,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ItemBeamCannon.cpp" />
+    <ClCompile Include="libs\hypercore\initHypercore.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Upgrades\BeamCannonUpgrade.cpp" />
+    <ClCompile Include="Upgrades\OpticsUpgrade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="info.json5" />
@@ -105,7 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ItemBeamCannon.h" />
-    <ClInclude Include="libs\hypercore\PlayerController.h" />
+    <ClInclude Include="Upgrades\OpticsUpgrade.h" />
+    <ClInclude Include="Upgrades\BeamCannonUpgrade.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

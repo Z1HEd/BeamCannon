@@ -1,9 +1,8 @@
-#define DEBUG_CONSOLE // Uncomment this if you want a debug console to start. You can use the Console class to print. You can use Console::inStrings to get input.
-
 #include "libs/hypercore/hypercore.h"
-#include "ItemBeamCannon.h"
 
 using namespace hypercore;
+
+bool HyperCore::startConsoleFlag = true;
 
 std::string chippingSoundFail = "assets/ChippingFail.ogg";
 std::string chippingSoundSuccess= "assets/ChippingSuccess.ogg";
@@ -23,7 +22,6 @@ void chipLens(std::unique_ptr<Item>& lens, Player* player, World* world)
 
 	EntityController::spawnEntityItem(world, std::string("Flawless ") + lens->getName().c_str(), player->cameraPos, player->vel);
 }
-
 $hook(void, Player, mouseButtonInput, GLFWwindow* window, World* world, int button, int action, int mods) {
 
 	if (button != GLFW_MOUSE_BUTTON_2 || action != GLFW_PRESS) return original(self, window, world, button, action, mods);
@@ -47,21 +45,26 @@ $hook(void, Player, mouseButtonInput, GLFWwindow* window, World* world, int butt
 }
 
 // Initialise stuff
-void gameInit() {
+void hypercore::gameInit() {
+	
+	//fdm::startConsole();
 
 	// Add items
 	ItemController::setDefaultIconFolder("assets/");
 
-	ItemController::addItem("Flawless Red Lens");
-	ItemController::addItem("Flawless Green Lens");
-	ItemController::addItem("Flawless Blue Lens");
+	ItemController::addMaterial("Flawless Red Lens");
+	ItemController::addMaterial("Flawless Green Lens");
+	ItemController::addMaterial("Flawless Blue Lens");
 
-	ItemController::addItem("Deadly Casing");
-	ItemController::addItem("Iron Plate");
-	ItemController::addItem("Solenoid Wire");
+	ItemController::addMaterial("Deadly Casing");
+	ItemController::addMaterial("Iron Plate");
+	ItemController::addMaterial("Solenoid Wire");
 
-	ItemController::addItem("Beam Concentrator");
-	ItemController::addItem("Beam Cannon","beamCannon");
+	ItemController::addMaterial("Beam Concentrator");
+	nlohmann::json attributes = nlohmann::json::object({ { "inventory", nlohmann::json::array()} });
+	ItemController::addItemWithAttributes("Beam Cannon", "beamCannon", attributes, true);
+
+	ItemController::addItem("4D Optics Upgrade", "beamCannonUpgrade");
 
 	// Add Recipes
 	RecipeController::enableDuplicateCheck();
@@ -72,6 +75,8 @@ void gameInit() {
 
 	RecipeController::addRecipe("Beam Concentrator", 1, { {"Flawless Blue Lens",1},{"Flawless Red Lens",1},{"Flawless Green Lens",1},{"Iron Plate",1} });
 	RecipeController::addRecipe("Beam Cannon", 1, { {"Beam Concentrator",1},{"Deadly Casing",2},{"Iron Plate",2},{"Solenoid Wire",3} });
+
+	RecipeController::addRecipe("4D Optics Upgrade", 1, { {"Iron Plate",2},{"4D Glasses",1}});
 
 	// Load sounds
 	SoundController::addSound(chippingSoundFail);

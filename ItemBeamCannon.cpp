@@ -1,4 +1,8 @@
+#include "libs/hypercore/hypercore.h"
 #include "ItemBeamCannon.h"
+#include "Upgrades/BeamCannonUpgrade.h"
+
+using namespace hypercore;
 
 bool ItemBeamCannon::isCompatible(const std::unique_ptr<Item>& other)
 {
@@ -17,11 +21,29 @@ uint32_t ItemBeamCannon::getStackLimit() {
 	return 1; 
 }
 
+void ItemBeamCannon::resetUpgrades() {
+	hasGlassesEffect = false;
+	hasCompassEffect = false;
+}
+void ItemBeamCannon::applyUpgrades() {
+	for (int i = 0;i < inventory.getSlotCount(); i++) {
+		if (auto* upgrade = dynamic_cast<BeamCannonUpgrade*>(inventory.getSlot(i)->get()))
+			upgrade->applyUpgrade(this);
+	}
+}
+void ItemBeamCannon::reloadUpgrades() {
+	resetUpgrades();
+	applyUpgrades();
+}
+
 bool ItemBeamCannon::action(World* world, Player* player, int action) {
-	
-	// actions are strange, better use player->keys
-	
-	return true; // return true if your code did something
+	Console::printLine(action);
+	if (player->keys.rightMouseDown) {
+		PlayerController::openInventory(player, inventory);
+		return true;
+	}
+
+	return true;
 }
 
 void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::vec4& lightDir) {
@@ -29,27 +51,28 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 }
 
 nlohmann::json ItemBeamCannon::saveAttributes() {
-	return nlohmann::json::object(); // Save attributes you need.
+	return {{ "inventory", inventory.save()}}; 
 }
 
 // Cloning item
 std::unique_ptr<Item> ItemBeamCannon::clone() {
 	auto result = std::make_unique<ItemBeamCannon>();
 
-	// Assign all the needed variables here
+	result->inventory = inventory;
 
 	return result;
 }
 
 // Instantiating item
 $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& itemName, uint32_t count, const stl::string& type, const nlohmann::json& attributes) {
-	
-	// Dont forget to change "type" to type of your item (the same as in ItemController::addItem(name,TYPE))
 	if (type != "beamCannon") return original(itemName, count, type, attributes);
 
 	auto result = std::make_unique<ItemBeamCannon>();
 	
-	// Assign all the needed variables here
+	result->inventory = InventoryGrid({ 2,3 });
+	result->inventory.load(attributes["inventory"]);
+	result->inventory.label = "Beam Cannon Upgrades:";
+	result->inventory.renderPos= glm::ivec2{ 397,50 };
 
 	return result;
 }

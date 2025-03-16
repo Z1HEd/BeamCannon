@@ -21,6 +21,15 @@
     <ClCompile Include="ItemBeamCannon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Upgrades\BeamCannonUpgrade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Upgrades\OpticsUpgrade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\hypercore\initHypercore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="info.json5" />
@@ -32,7 +41,10 @@
     <ClInclude Include="ItemBeamCannon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="libs\hypercore\PlayerController.h">
+    <ClInclude Include="Upgrades\BeamCannonUpgrade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Upgrades\OpticsUpgrade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

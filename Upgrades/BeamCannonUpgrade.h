@@ -1,28 +1,21 @@
 #pragma once
 
 #include <4dm.h>
+#include "../ItemBeamCannon.h"
 
 using namespace fdm;
 
-class ItemBeamCannon : public Item {
+class BeamCannonUpgrade : public Item {
 public:
-	bool hasGlassesEffect;
-	bool hasCompassEffect;
-
-	InventoryGrid inventory;
-
-	void resetUpgrades();
-	void applyUpgrades();
-	void reloadUpgrades();
+	//Virtual functions
+	virtual void applyUpgrade(ItemBeamCannon* beamCannon) {};
 
 	// Virtual functions overrides
-	bool isCompatible(const std::unique_ptr<Item>& other) override;
-	stl::string getName() override;
 	bool isDeadly() override;
 	uint32_t getStackLimit() override;
 	bool action(World* world, Player* player, int action) override;
 	void renderEntity(const m4::Mat5& MV, bool inHand, const glm::vec4& lightDir) override;
-	std::unique_ptr<Item> clone() override;
+
 	nlohmann::json saveAttributes() override;
-	
+
 };
