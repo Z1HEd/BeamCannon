@@ -5,7 +5,7 @@
 using namespace fdm;
 
 namespace hypercore {
-    class SoundLoader {
+    class SoundController {
     public:
         static std::vector<std::string> sounds;
 
@@ -20,5 +20,5 @@ namespace hypercore {
                 else Console::printLine("Successfully loaded sound: ", sound);
         }
     };
-    std::vector<std::string> SoundLoader::sounds;
+    std::vector<std::string> SoundController::sounds;
 }

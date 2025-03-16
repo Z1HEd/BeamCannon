@@ -29,16 +29,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libs\hypercore\ItemManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="libs\hypercore\RecipeManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="libs\hypercore\SoundLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ItemBeamCannon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\hypercore\PlayerController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

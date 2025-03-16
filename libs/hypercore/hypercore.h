@@ -4,9 +4,11 @@
 
 #include <4dm.h>
 
-#include "ItemManager.h"
-#include "RecipeManager.h"
-#include "SoundLoader.h"
+#include "ItemController.h"
+#include "RecipeController.h"
+#include "SoundController.h"
+#include "EntityController.h"
+#include "PlayerController.h"
 
 using namespace fdm;
 
@@ -27,9 +29,9 @@ namespace hypercore {
 		gameInit();
 
 
-		ItemManager::initBlueprints();
+		ItemController::initBlueprints();
 
-		SoundLoader::loadSounds();
+		SoundController::loadSounds();
 	}
 }
 

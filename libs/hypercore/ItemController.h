@@ -5,7 +5,7 @@
 using namespace fdm;
 
 namespace hypercore {
-	class ItemManager {
+	class ItemController {
 	public:
 		struct ItemData {
 			std::string name;
@@ -51,24 +51,24 @@ namespace hypercore {
 			};
 		}
 	};
-	std::vector<ItemManager::ItemData> ItemManager::items = {};
-	std::string ItemManager::defaultIconFolder = "";
+	std::vector<ItemController::ItemData> ItemController::items = {};
+	std::string ItemController::defaultIconFolder = "";
 
 
 	// Render item icons
 	$hook(void, ItemMaterial, render, const glm::ivec2& pos) 
 	{
-		auto index = std::find_if(ItemManager::items.begin(), ItemManager::items.end(), [&](const ItemManager::ItemData& item) {
+		auto index = std::find_if(ItemController::items.begin(), ItemController::items.end(), [&](const ItemController::ItemData& item) {
 			return item.name == self->getName();
-			}) - ItemManager::items.begin();
+			}) - ItemController::items.begin();
 
-		if (index == ItemManager::items.size())
+		if (index == ItemController::items.size())
 			return original(self, pos);
 
 		TexRenderer& tr = *ItemTool::tr; // or TexRenderer& tr = ItemTool::tr; after 0.3
 		const Tex2D* ogTex = tr.texture; // remember the original texture
 
-		tr.texture = ResourceManager::get(ItemManager::items[index].iconPath, true); // set to custom texture
+		tr.texture = ResourceManager::get(ItemController::items[index].iconPath, true); // set to custom texture
 		tr.setClip(0, 0, 36, 36);
 		tr.setPos(pos.x, pos.y, 70, 72);
 		tr.render();
@@ -80,13 +80,13 @@ namespace hypercore {
 	//Deadly text effect
 	$hook(bool, ItemMaterial, isDeadly)
 	{
-		auto index = std::find_if(ItemManager::items.begin(), ItemManager::items.end(), [&](const ItemManager::ItemData& item) {
+		auto index = std::find_if(ItemController::items.begin(), ItemController::items.end(), [&](const ItemController::ItemData& item) {
 			return item.name == self->getName();
-			}) - ItemManager::items.begin();
+			}) - ItemController::items.begin();
 
-		if (index == ItemManager::items.size())
+		if (index == ItemController::items.size())
 			return original(self);
 
-		return ItemManager::items[index].isDeadly;
+		return ItemController::items[index].isDeadly;
 	}
 }
