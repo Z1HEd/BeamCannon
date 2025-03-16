@@ -38,11 +38,12 @@ void ItemBeamCannon::reloadUpgrades() {
 
 bool ItemBeamCannon::action(World* world, Player* player, int action) {
 	Console::printLine(action);
+	
 	if (player->keys.rightMouseDown) {
 		PlayerController::openInventory(player, inventory);
 		return true;
 	}
-
+	
 	return true;
 }
 

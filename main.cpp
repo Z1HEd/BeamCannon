@@ -61,8 +61,7 @@ void hypercore::gameInit() {
 	ItemController::addMaterial("Solenoid Wire");
 
 	ItemController::addMaterial("Beam Concentrator");
-	nlohmann::json attributes = nlohmann::json::object({ { "inventory", nlohmann::json::array()} });
-	ItemController::addItemWithAttributes("Beam Cannon", "beamCannon", attributes, true);
+	ItemController::addItemWithAttributes("Beam Cannon", "beamCannon", { { "inventory", nlohmann::json::array()} }, true);
 
 	ItemController::addItem("4D Optics Upgrade", "beamCannonUpgrade");
 

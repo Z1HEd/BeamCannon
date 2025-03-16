@@ -21,13 +21,13 @@ namespace hypercore {
 		inline static void setDefaultIconFolder(const std::string& path) {
 			defaultIconFolder = path;
 		}
-		
-		// Assumes item is material, and path is defaultIconFolder+itemName.png without spaces
+
+		// Adds a material without any attributes, assumes iconPath is "defaultIconFolder{itemName}.png" without spaces
 		inline static void addMaterial(const std::string& itemName, const bool& isDeadly = false) {
 			addItem(itemName, "material", isDeadly);
 		}
-		
-		// Assumes path is defaultIconFolder+itemName.png without spaces
+
+		// Adds item without any attributes, assumes iconPath is "defaultIconFolder{itemName}.png" without spaces
 		inline static void addItem(const std::string& itemName, const std::string& itemType, const bool& isDeadly=false) {
 			
 			static std::string iconPath="";
@@ -37,12 +37,13 @@ namespace hypercore {
 
 			addItem(itemName, itemType,iconPath, isDeadly);
 		}
-		
-		// Adds item to the game.
+
+		// Adds item without any attributes
 		inline static void addItem(const std::string& itemName, const std::string& itemType, const std::string& iconPath, const bool& isDeadly=false) {
 			addItemWithAttributes(itemName, itemType, iconPath,nlohmann::json::object(), isDeadly);
 		}
-		// Assumes path is defaultIconFolder+itemName.png without spaces
+
+		// Assumes iconPath is "defaultIconFolder{itemName}.png" without spaces
 		inline static void addItemWithAttributes(const std::string& itemName, const std::string& itemType,const nlohmann::json& attributes, const bool& isDeadly = false) {
 
 			static std::string iconPath = "";
@@ -52,8 +53,7 @@ namespace hypercore {
 
 			addItemWithAttributes(itemName, itemType, iconPath, attributes, isDeadly);
 		}
-
-		// Adds item to the game.
+		// Adds custom item
 		inline static void addItemWithAttributes(const std::string& itemName, const std::string& itemType, const std::string& iconPath,const nlohmann::json& attributes, const bool& isDeadly = false) {
 			if (Item::blueprints->contains(itemName)) return;
 			items.push_back(ItemData{ itemName,itemType,iconPath,attributes, isDeadly });
