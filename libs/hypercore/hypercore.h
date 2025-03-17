@@ -13,8 +13,9 @@ namespace hypercore {
 	class HyperCore {
 	public:
 		static bool startConsoleFlag;
+		static void initMod();
 	};
-	extern void gameInit();
+	
 }
 
 #endif //__HYPERCORE_H__

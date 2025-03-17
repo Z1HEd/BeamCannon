@@ -45,9 +45,7 @@ $hook(void, Player, mouseButtonInput, GLFWwindow* window, World* world, int butt
 }
 
 // Initialise stuff
-void hypercore::gameInit() {
-	
-	//fdm::startConsole();
+void HyperCore::initMod() {
 
 	// Add items
 	ItemController::setDefaultIconFolder("assets/");
@@ -56,7 +54,7 @@ void hypercore::gameInit() {
 	ItemController::addMaterial("Flawless Green Lens");
 	ItemController::addMaterial("Flawless Blue Lens");
 
-	ItemController::addMaterial("Deadly Casing");
+	ItemController::addMaterial("Deadly Casing",true);
 	ItemController::addMaterial("Iron Plate");
 	ItemController::addMaterial("Solenoid Wire");
 

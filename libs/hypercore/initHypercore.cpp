@@ -1,4 +1,3 @@
-//#define DEBUG_CONSOLE // Uncomment this if you want a debug console to start. You can use the Console class to print. You can use Console::inStrings to get input.
 #include "hypercore.h"
 #include <4dm.h>
 
@@ -21,7 +20,7 @@ $hook(void, StateIntro, init, StateManager& s)
 	glewInit();
 	glfwInit();
 
-	gameInit();
+	HyperCore::initMod();
 
 	ItemController::initBlueprints();
 
