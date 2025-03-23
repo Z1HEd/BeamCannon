@@ -97,7 +97,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ItemBeamCannon.cpp" />
-    <ClCompile Include="libs\hypercore\initHypercore.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Upgrades\BeamCannonUpgrade.cpp" />
     <ClCompile Include="Upgrades\OpticsUpgrade.cpp" />
