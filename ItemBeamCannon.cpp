@@ -35,26 +35,26 @@ void ItemBeamCannon::reloadUpgrades() {
 	applyUpgrades();
 }
 
-bool ItemBeamCannon::action(World* world, Player* player, int action) {
-	static InventorySession inventorySession{};
-	Console::printLine(action);
-	
-	if (player->keys.rightMouseDown) {
-		if (player->inventoryManager.isOpen()) return false;
+bool ItemBeamCannon::handleInputs(Player* player) {
+	return false;
+}
 
-		player->inventoryManager.primary = &player->playerInventory;
-		player->shouldResetMouse = true;
-		player->inventoryManager.secondary = &inventory;
+void ItemBeamCannon::openInventory(Player* player) {
+	if (player->inventoryManager.isOpen()) return;
+	player->inventoryManager.primary = &player->playerInventory;
+	player->shouldResetMouse = true;
+	player->inventoryManager.secondary = &inventory;
 
 
-		player->inventoryManager.craftingMenu.updateAvailableRecipes();
-		player->inventoryManager.updateCraftingMenuBox();
+	player->inventoryManager.craftingMenu.updateAvailableRecipes();
+	player->inventoryManager.updateCraftingMenuBox();
 
-		inventorySession.inventory = &inventory;
-		inventorySession.manager = &player->inventoryManager;
-	}
-	
-	return true;
+	inventorySession.inventory = &inventory;
+	inventorySession.manager = &player->inventoryManager;
+}
+
+bool ItemBeamCannon::action(World*world, Player* player, int action) {
+	return handleInputs(&StateGame::instanceObj->player);
 }
 
 void ItemBeamCannon::render(const glm::ivec2& pos) {
@@ -74,8 +74,14 @@ void ItemBeamCannon::render(const glm::ivec2& pos) {
 	tr.texture = ogTex; // return to the original texture
 }
 
+
+
 void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::vec4& lightDir) {
+	if (hasCompassEffect)
+		CompassRenderer::renderHand(glm::mat4x4{ {0,0,0,1},{0,0,0,0},{0,0,1,0},{1,0,0,0} });
+	
 	// Render item model
+
 }
 
 nlohmann::json ItemBeamCannon::saveAttributes() {
@@ -86,8 +92,6 @@ nlohmann::json ItemBeamCannon::saveAttributes() {
 std::unique_ptr<Item> ItemBeamCannon::clone() {
 	auto result = std::make_unique<ItemBeamCannon>();
 
-	Console::printLine("CLONING");
-
 	result->inventory = inventory;
 
 	return result;
@@ -97,14 +101,25 @@ std::unique_ptr<Item> ItemBeamCannon::clone() {
 $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& itemName, uint32_t count, const stl::string& type, const nlohmann::json& attributes) {
 	if (type != "beamCannon") return original(itemName, count, type, attributes);
 
-	Console::printLine("INSTATNIATE");
-
 	auto result = std::make_unique<ItemBeamCannon>();
 	
 	result->inventory = InventoryGrid({ 2,3 });
 	result->inventory.load(attributes["inventory"]);
+	result->inventory.name = "beamCannonInventory";
 	result->inventory.label = "Beam Cannon Upgrades:";
 	result->inventory.renderPos= glm::ivec2{ 397,50 };
+	result->count = 1;
+
+	result->applyUpgrades();
 
 	return result;
+}
+
+// Glasses effect
+$hook(bool, Player, isHoldingGlasses) {
+	ItemBeamCannon* beamCannon;
+	beamCannon = dynamic_cast<ItemBeamCannon*>(self->hotbar.getSlot(self->hotbar.selectedIndex)->get());
+	if (!beamCannon) beamCannon = dynamic_cast<ItemBeamCannon*>(self->equipment.getSlot(0)->get());
+	if (!beamCannon) return original(self);
+	return original(self) || beamCannon->hasGlassesEffect;
 }

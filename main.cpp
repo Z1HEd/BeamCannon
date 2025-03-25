@@ -1,6 +1,8 @@
 #define DEBUG_CONSOLE // Uncomment this if you want a debug console to start. You can use the Console class to print. You can use Console::inStrings to get input.
 
 #include <4dm.h>
+#include "4DKeyBinds.h"
+#include "ItemBeamCannon.h"
 
 initDLL
 
@@ -109,6 +111,34 @@ $hook(void, ItemMaterial, render, const glm::ivec2& pos)
 	tr.texture = ogTex; // return to the original texture
 }
 
+// Handle Beam Cannon Upgrades 
+$hook(bool, InventoryManager, applyTransfer, InventoryManager::TransferAction action, std::unique_ptr<Item>& selectedSlot, std::unique_ptr<Item>& cursorSlot, Inventory* other) {
+	// How the fuck does this work
+	
+	InventoryManager& actualInventoryManager = StateGame::instanceObj->player.inventoryManager; // self is bullshit, when taking stuff its nullptr lol
+
+
+	ItemBeamCannon* beamCannon = dynamic_cast<ItemBeamCannon*>(StateGame::instanceObj->player.hotbar.getSlot(StateGame::instanceObj->player.hotbar.selectedIndex)->get());
+	if (beamCannon==nullptr) 
+		beamCannon = dynamic_cast<ItemBeamCannon*>(StateGame::instanceObj->player.equipment.getSlot(0)->get());
+	if (beamCannon == nullptr) return original(self, action, selectedSlot, cursorSlot, other);
+	
+
+	if (cursorSlot &&
+		actualInventoryManager.secondary != nullptr &&
+		actualInventoryManager.secondary->name == "beamCannonInventory" &&
+		actualInventoryManager.secondary != other &&
+		dynamic_cast<BeamCannonUpgrade*>(cursorSlot.get()) != nullptr &&
+		!dynamic_cast<BeamCannonUpgrade*>(cursorSlot.get())->canBePutInto(dynamic_cast<InventoryGrid*>(actualInventoryManager.secondary)))
+			return true; // Dont put incompatible upgrades
+
+	auto result = original(self, action, selectedSlot, cursorSlot, other);
+	beamCannon->reloadUpgrades();
+	return result;
+}
+
+
+//Init stuff
 $hookStatic(void, CraftingMenu, loadRecipes)
 {
 	static bool recipesLoaded = false;
@@ -130,9 +160,6 @@ $hookStatic(void, CraftingMenu, loadRecipes)
 		CraftingMenu::recipes->push_back(recipe);
 	}
 }
-
-//Init stuff
-
 void addRecipe(const std::string& resultName, int resultCount,
 	const std::vector<std::pair<std::string, int>>& components) {
 
@@ -202,4 +229,20 @@ $hook(void, StateIntro, init, StateManager& s)
 	InitRecipes();
 
 	InitSounds();
+}
+//Keybinds
+void openBeamCannonInventory(GLFWwindow* window, int action, int mods)
+{
+	Player* player = &StateGame::instanceObj->player;
+	if (player == nullptr || player->inventoryManager.isOpen()) return;
+
+	ItemBeamCannon* beamCannon;
+	beamCannon = dynamic_cast<ItemBeamCannon*>(player->hotbar.getSlot(player->hotbar.selectedIndex)->get());
+	if (!beamCannon) beamCannon = dynamic_cast<ItemBeamCannon*>(player->equipment.getSlot(0)->get());
+	if (!beamCannon) return;
+	beamCannon->openInventory(player);
+}
+$exec
+{
+	KeyBinds::addBind("Beam Cannon", "Open Beam Cannon Upgrades", glfw::Keys::R, KeyBindsScope::PLAYER, openBeamCannonInventory);
 }

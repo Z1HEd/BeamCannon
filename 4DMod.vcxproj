@@ -99,6 +99,7 @@
     <ClCompile Include="ItemBeamCannon.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Upgrades\BeamCannonUpgrade.cpp" />
+    <ClCompile Include="Upgrades\GyroscopeUpgrade.cpp" />
     <ClCompile Include="Upgrades\OpticsUpgrade.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -106,7 +107,9 @@
     <None Include="postbuild.bat" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="4DKeyBinds.h" />
     <ClInclude Include="ItemBeamCannon.h" />
+    <ClInclude Include="Upgrades\GyroscopeUpgrade.h" />
     <ClInclude Include="Upgrades\OpticsUpgrade.h" />
     <ClInclude Include="Upgrades\BeamCannonUpgrade.h" />
   </ItemGroup>

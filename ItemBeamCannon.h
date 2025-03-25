@@ -1,6 +1,7 @@
 #pragma once
 
 #include <4dm.h>
+#include "Upgrades/BeamCannonUpgrade.h"
 
 using namespace fdm;
 
@@ -10,10 +11,15 @@ public:
 	bool hasCompassEffect;
 
 	InventoryGrid inventory;
+	InventorySession inventorySession{};
 
 	void resetUpgrades();
 	void applyUpgrades();
 	void reloadUpgrades();
+
+	void openInventory(Player*player);
+
+	bool handleInputs(Player*);
 
 	// Virtual functions overrides
 	bool isCompatible(const std::unique_ptr<Item>& other) override;
