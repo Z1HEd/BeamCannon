@@ -1,5 +1,6 @@
 #include "BeamCannonUpgrade.h"
 #include "OpticsUpgrade.h"
+#include "GyroscopeUpgrade.h"
 
 bool BeamCannonUpgrade::isDeadly() {
 	return false;
@@ -43,7 +44,6 @@ void BeamCannonUpgrade::render(const glm::ivec2& pos) {
 // Instantiating item
 $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& itemName, uint32_t count, const stl::string& type, const nlohmann::json& attributes) {
 
-	// Dont forget to change "type" to type of your item (the same as in ItemManager::addItem(name,TYPE))
 	if (type != "beamCannonUpgrade") return original(itemName, count, type, attributes);
 
 	
@@ -51,6 +51,8 @@ $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& ite
 
 	if (itemName == "4D Optics Upgrade")
 		result = std::make_unique<OpticsUpgrade>();
+	else if (itemName == "Gyroscope Upgrade")
+		result = std::make_unique<GyroscopeUpgrade>();
 
 	return result;
 }

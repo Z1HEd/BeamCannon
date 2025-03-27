@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="4DKeyBinds.h" />
+    <ClInclude Include="EntityController.h" />
     <ClInclude Include="ItemBeamCannon.h" />
     <ClInclude Include="Upgrades\GyroscopeUpgrade.h" />
     <ClInclude Include="Upgrades\OpticsUpgrade.h" />

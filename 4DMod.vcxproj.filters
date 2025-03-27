@@ -27,7 +27,7 @@
     <ClCompile Include="Upgrades\OpticsUpgrade.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="libs\hypercore\initHypercore.cpp">
+    <ClCompile Include="Upgrades\GyroscopeUpgrade.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -45,6 +45,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Upgrades\OpticsUpgrade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="4DKeyBinds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Upgrades\GyroscopeUpgrade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

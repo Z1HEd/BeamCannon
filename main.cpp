@@ -2,11 +2,13 @@
 
 #include <4dm.h>
 #include "4DKeyBinds.h"
+#include "EntityController.h"
 #include "ItemBeamCannon.h"
 
 initDLL
 
 using namespace fdm;
+using namespace hypercore;
 
 std::vector<std::string> materials = {
 	"Flawless Red Lens",
@@ -19,27 +21,16 @@ std::vector<std::string> materials = {
 };
 
 std::vector<std::string> upgrades = {
-	"4D Optics Upgrade"
+	"4D Optics Upgrade",
+	"Gyroscope Upgrade"
 };
 
 std::vector<nlohmann::json> recipes = {};
 
 std::string chippingSoundFail = "assets/ChippingFail.ogg";
 std::string chippingSoundSuccess= "assets/ChippingSuccess.ogg";
-
-void spawnEntity(World* world, std::unique_ptr<Entity>& entity) {
-	static glm::vec4 entityPos;
-	static Chunk* chunk;
-	entityPos = entity->getPos();
-	chunk = world->getChunkFromCoords(entityPos.x, entityPos.z, entityPos.w);
-	if (chunk) world->addEntityToChunk(entity, chunk);
-}
-void spawnEntityItem(World* world, const std::string& itemName, glm::vec4& position, glm::vec4& velocity) {
-	std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
-		Item::create(itemName, 1), position, velocity
-	);
-	spawnEntity(world, spawnedEntity);
-}
+std::string fuelSwitchSound = "assets/FuelSwitch.ogg";
+std::string fuelFlushSound = "assets/FuelFlush.ogg";
 
 // Lens Chipping mechanic
 void chipLens(std::unique_ptr<Item>& lens, Player* player, World* world)
@@ -54,7 +45,7 @@ void chipLens(std::unique_ptr<Item>& lens, Player* player, World* world)
 
 	AudioManager::playSound4D(chippingSoundSuccess, "ambience", player->cameraPos, player->vel);
 
-	spawnEntityItem(world, std::string("Flawless ") + lens->getName().c_str(), player->cameraPos, player->vel);
+	EntityController::spawnEntityItem(world, std::string("Flawless ") + lens->getName().c_str(), player->cameraPos, player->vel);
 }
 $hook(void, Player, mouseButtonInput, GLFWwindow* window, World* world, int button, int action, int mods) {
 
@@ -76,6 +67,7 @@ $hook(void, Player, mouseButtonInput, GLFWwindow* window, World* world, int butt
 		mainHandItem->getName() == "Green Lens" ||
 		mainHandItem->getName() == "Blue Lens")
 		) chipLens(mainHandItem, self, world);
+	original(self, window, world, button, action, mods);
 }
 
 
@@ -184,6 +176,7 @@ void InitRecipes() {
 	addRecipe("Beam Cannon", 1, { {"Beam Concentrator",1},{"Deadly Casing",2},{"Iron Plate",2},{"Solenoid Wire",3} });
 
 	addRecipe("4D Optics Upgrade", 1, { {"Iron Plate",2},{"4D Glasses",1} });
+	addRecipe("Gyroscope Upgrade", 1, { {"Iron Plate",2},{"Gyroscope",1} });
 }
 void InitBlueprints() {
 	// Materials
@@ -212,6 +205,13 @@ void InitBlueprints() {
 void InitSounds() {
 	chippingSoundFail = std::format("../../{}/{}", fdm::getModPath(fdm::modID), chippingSoundFail);
 	chippingSoundSuccess = std::format("../../{}/{}", fdm::getModPath(fdm::modID), chippingSoundSuccess);
+	fuelSwitchSound = std::format("../../{}/{}", fdm::getModPath(fdm::modID), fuelSwitchSound);
+	fuelFlushSound = std::format("../../{}/{}", fdm::getModPath(fdm::modID), fuelFlushSound);
+
+	if (!AudioManager::loadSound(chippingSoundFail)) Console::printLine("Cannot load sound: ", chippingSoundFail);
+	if (!AudioManager::loadSound(chippingSoundSuccess)) Console::printLine("Cannot load sound: ", chippingSoundSuccess);
+	if (!AudioManager::loadSound(fuelSwitchSound)) Console::printLine("Cannot load sound: ", fuelSwitchSound);
+	if (!AudioManager::loadSound(fuelFlushSound)) Console::printLine("Cannot load sound: ", fuelFlushSound);
 }
 
 $hook(void, StateIntro, init, StateManager& s)
@@ -231,6 +231,20 @@ $hook(void, StateIntro, init, StateManager& s)
 	InitSounds();
 }
 //Keybinds
+
+
+void changeFuel(GLFWwindow* window, int action, int mods)
+{
+	Player* player = &StateGame::instanceObj->player;
+	if (action != GLFW_PRESS || player == nullptr || player->inventoryManager.isOpen()) return;
+
+	ItemBeamCannon* beamCannon;
+	beamCannon = dynamic_cast<ItemBeamCannon*>(player->hotbar.getSlot(player->hotbar.selectedIndex)->get());
+	if (!beamCannon) beamCannon = dynamic_cast<ItemBeamCannon*>(player->equipment.getSlot(0)->get());
+	if (!beamCannon) return;
+	beamCannon->isSelectedFuelDeadly = !beamCannon->isSelectedFuelDeadly;
+	AudioManager::playSound4D(fuelSwitchSound, "ambience", player->cameraPos, { 0,0,0,0 });
+}
 void openBeamCannonInventory(GLFWwindow* window, int action, int mods)
 {
 	Player* player = &StateGame::instanceObj->player;
@@ -242,7 +256,20 @@ void openBeamCannonInventory(GLFWwindow* window, int action, int mods)
 	if (!beamCannon) return;
 	beamCannon->openInventory(player);
 }
+void flushFuelTank(GLFWwindow* window, int action, int mods)
+{
+	Player* player = &StateGame::instanceObj->player;
+	if (player == nullptr || player->inventoryManager.isOpen()) return;
+
+	ItemBeamCannon* beamCannon;
+	beamCannon = dynamic_cast<ItemBeamCannon*>(player->hotbar.getSlot(player->hotbar.selectedIndex)->get());
+	if (!beamCannon) beamCannon = dynamic_cast<ItemBeamCannon*>(player->equipment.getSlot(0)->get());
+	if (!beamCannon) return;
+	beamCannon->isFlushing = action;
+}
 $exec
 {
-	KeyBinds::addBind("Beam Cannon", "Open Beam Cannon Upgrades", glfw::Keys::R, KeyBindsScope::PLAYER, openBeamCannonInventory);
+	KeyBinds::addBind("Beam Cannon", "Change fuel", glfw::Keys::R, KeyBindsScope::PLAYER, changeFuel);
+	KeyBinds::addBind("Beam Cannon", "Open Beam Cannon Upgrades", glfw::Keys::F, KeyBindsScope::PLAYER, openBeamCannonInventory);
+	KeyBinds::addBind("Beam Cannon", "Flush fuel tank", glfw::Keys::Z, KeyBindsScope::PLAYER, flushFuelTank);
 }
