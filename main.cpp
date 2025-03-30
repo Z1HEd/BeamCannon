@@ -30,7 +30,7 @@ std::vector<nlohmann::json> recipes = {};
 std::string chippingSoundFail = "assets/ChippingFail.ogg";
 std::string chippingSoundSuccess= "assets/ChippingSuccess.ogg";
 std::string fuelSwitchSound = "assets/FuelSwitch.ogg";
-std::string fuelFlushSound = "assets/FuelFlush.ogg";
+
 
 // Lens Chipping mechanic
 void chipLens(std::unique_ptr<Item>& lens, Player* player, World* world)
@@ -206,12 +206,18 @@ void InitSounds() {
 	chippingSoundFail = std::format("../../{}/{}", fdm::getModPath(fdm::modID), chippingSoundFail);
 	chippingSoundSuccess = std::format("../../{}/{}", fdm::getModPath(fdm::modID), chippingSoundSuccess);
 	fuelSwitchSound = std::format("../../{}/{}", fdm::getModPath(fdm::modID), fuelSwitchSound);
-	fuelFlushSound = std::format("../../{}/{}", fdm::getModPath(fdm::modID), fuelFlushSound);
+	ItemBeamCannon::fuelFlushSound = std::format("../../{}/{}", fdm::getModPath(fdm::modID), "assets/FuelFlush.ogg");
+	ItemBeamCannon::laserSound = std::format("../../{}/{}", fdm::getModPath(fdm::modID), "assets/LaserSound.ogg");
+
 
 	if (!AudioManager::loadSound(chippingSoundFail)) Console::printLine("Cannot load sound: ", chippingSoundFail);
 	if (!AudioManager::loadSound(chippingSoundSuccess)) Console::printLine("Cannot load sound: ", chippingSoundSuccess);
 	if (!AudioManager::loadSound(fuelSwitchSound)) Console::printLine("Cannot load sound: ", fuelSwitchSound);
-	if (!AudioManager::loadSound(fuelFlushSound)) Console::printLine("Cannot load sound: ", fuelFlushSound);
+	if (!AudioManager::loadSound(ItemBeamCannon::fuelFlushSound)) Console::printLine("Cannot load sound: ", ItemBeamCannon::fuelFlushSound);
+	if (!AudioManager::loadSound(ItemBeamCannon::laserSound)) Console::printLine("Cannot load sound: ", ItemBeamCannon::laserSound);
+}
+void InitShaders() {
+	ShaderManager::load("projectileShader", "../../assets/shaders/tetNormal.vs", "assets/lens.fs", "../../assets/shaders/tetNormal.gs");
 }
 
 $hook(void, StateIntro, init, StateManager& s)
@@ -223,6 +229,7 @@ $hook(void, StateIntro, init, StateManager& s)
 	glewInit();
 	glfwInit();
 
+	ItemBeamCannon::rendererInit();
 
 	InitBlueprints();
 

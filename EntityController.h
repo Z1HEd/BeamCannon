@@ -11,7 +11,6 @@ namespace hypercore {
 			static Chunk* chunk;
 			entityPos = entity->getPos();
 			chunk = world->getChunkFromCoords(entityPos.x, entityPos.z, entityPos.w);
-			Console::printLine(entityPos.x," ", entityPos.z, " ", entityPos.w);
 			if (chunk) world->addEntityToChunk(entity, chunk);
 		}
 

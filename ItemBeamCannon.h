@@ -8,13 +8,16 @@ using namespace fdm;
 class ItemBeamCannon : public Item {
 public:
 
-	static std::string fuelFlushSound = "assets/FuelFlush.ogg";
+	static std::string fuelFlushSound;
+	static std::string laserSound;
 
 	bool hasGlassesEffect;
 	bool hasCompassEffect;
 	float effectiveDistance;
 	float entityDamage;
+	float diggingPower;
 	float fuelUsage;
+	float effectArea;
 
 	float fuelLevel = 0;
 	bool isFuelDeadly = false;
@@ -31,6 +34,8 @@ public:
 
 	int getSelectedFuelCount(InventoryPlayer& inventory);
 	void consumeSelectedFuel(InventoryPlayer& inventory);
+	float getLaserLength();
+
 	static void rendererInit();
 
 	void openInventory(Player*player);
