@@ -1,24 +1,24 @@
-#include "GyroscopeUpgrade.h"
+#include "MagnetUpgrade.h"
 
-void GyroscopeUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
-	beamCannon->hasCompassEffect = true;
+void MagnetUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
+	beamCannon->hasMagnetEffect = true;
 }
 
-bool GyroscopeUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
-	return dynamic_cast<GyroscopeUpgrade*>(upgrade) == nullptr; // Can only apply once
+bool MagnetUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
+	return dynamic_cast<MagnetUpgrade*>(upgrade) == nullptr; // Can only apply once
 }
 
-bool GyroscopeUpgrade::isCompatible(const std::unique_ptr<Item>& other)
+bool MagnetUpgrade::isCompatible(const std::unique_ptr<Item>& other)
 {
-	return dynamic_cast<GyroscopeUpgrade*>(other.get());
+	return dynamic_cast<MagnetUpgrade*>(other.get());
 }
 
-stl::string GyroscopeUpgrade::getName() {
-	return "Gyroscope Upgrade";
+stl::string MagnetUpgrade::getName() {
+	return "Magnet Upgrade";
 }
 
-std::unique_ptr<Item> GyroscopeUpgrade::clone() {
-	auto result = std::make_unique<GyroscopeUpgrade>();
+std::unique_ptr<Item> MagnetUpgrade::clone() {
+	auto result = std::make_unique<MagnetUpgrade>();
 
 	return result;
 }

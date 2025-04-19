@@ -5,7 +5,7 @@
 
 using namespace fdm;
 
-class OpticsUpgrade : public BeamCannonUpgrade {
+class FiltrationUpgrade : public BeamCannonUpgrade {
 	void applyUpgrade(ItemBeamCannon* beamCannon) override;
 	bool isCompatibleUpgrade(BeamCannonUpgrade* upgrade) override;
 	

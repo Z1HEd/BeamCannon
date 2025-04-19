@@ -83,13 +83,14 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>./4dm.h;./4dm.h/networking/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>./4dm.h/networking/lib/*;./4dm.h/soil/soil2.lib;opengl32.lib;./4dm.h/glew32.lib;./4dm.h/glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>./4dm.h/networking/lib/*;./4dm.h/soil/soil2.lib;opengl32.lib;./4dm.h/GL/glew32.lib;./4dm.h/glfw/glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>"$(ProjectDir)postbuild.bat" "$(TargetPath)" "$(ProjectDir)"</Command>
@@ -98,8 +99,14 @@
   <ItemGroup>
     <ClCompile Include="ItemBeamCannon.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Upgrades\AreaUpgrade.cpp" />
     <ClCompile Include="Upgrades\BeamCannonUpgrade.cpp" />
+    <ClCompile Include="Upgrades\CoilsUpgrade.cpp" />
+    <ClCompile Include="Upgrades\ConcentratorUpgrade.cpp" />
+    <ClCompile Include="Upgrades\FiltrationUpgrade.cpp" />
     <ClCompile Include="Upgrades\GyroscopeUpgrade.cpp" />
+    <ClCompile Include="Upgrades\MagnetUpgrade.cpp" />
+    <ClCompile Include="Upgrades\MatterDisassemblerUpgrade.cpp" />
     <ClCompile Include="Upgrades\OpticsUpgrade.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -110,7 +117,13 @@
     <ClInclude Include="4DKeyBinds.h" />
     <ClInclude Include="EntityController.h" />
     <ClInclude Include="ItemBeamCannon.h" />
+    <ClInclude Include="Upgrades\AreaUpgrade.h" />
+    <ClInclude Include="Upgrades\CoilsUpgrade.h" />
+    <ClInclude Include="Upgrades\ConcentratorUpgrade.h" />
+    <ClInclude Include="Upgrades\FiltrationUpgrade.h" />
     <ClInclude Include="Upgrades\GyroscopeUpgrade.h" />
+    <ClInclude Include="Upgrades\MagnetUpgrade.h" />
+    <ClInclude Include="Upgrades\MatterDisassemblerUpgrade.h" />
     <ClInclude Include="Upgrades\OpticsUpgrade.h" />
     <ClInclude Include="Upgrades\BeamCannonUpgrade.h" />
   </ItemGroup>

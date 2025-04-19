@@ -8,25 +8,26 @@ using namespace fdm;
 class ItemBeamCannon : public Item {
 public:
 
-	static std::string fuelFlushSound;
 	static std::string laserSound;
 
 	bool hasGlassesEffect;
 	bool hasCompassEffect;
+	bool hasMagnetEffect;
 	float effectiveDistance;
 	float entityDamage;
 	float diggingPower;
 	float fuelUsage;
-	float effectArea;
+	int diggingArea;
 
+	double timeSinceLastTick = 0;
 	float fuelLevel = 0;
 	bool isFuelDeadly = false;
 	bool isSelectedFuelDeadly = false;
-	bool isFlushing = false;
 
 	InventoryGrid inventory;
 	InventorySession inventorySession{};
 	static MeshRenderer renderer;
+	
 
 	void resetUpgrades();
 	void applyUpgrades();
@@ -40,8 +41,11 @@ public:
 
 	void openInventory(Player*player);
 
+	void destroyBlock(World* world, const glm::ivec4& blockPos, const glm::vec4& dropPos);
+	void destroyArea(World* world, const glm::ivec4& centerPos,const int& size);
+
 	void update(Player*,double);
-	void tryShooting(Player*, double);
+	bool tryShooting(Player*, double);
 
 	// Virtual functions overrides
 	bool isCompatible(const std::unique_ptr<Item>& other) override;

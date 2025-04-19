@@ -5,7 +5,7 @@
 
 using namespace fdm;
 
-class GyroscopeUpgrade : public BeamCannonUpgrade {
+class ConcentratorUpgrade : public BeamCannonUpgrade {
 	void applyUpgrade(ItemBeamCannon* beamCannon) override;
 	bool isCompatibleUpgrade(BeamCannonUpgrade* upgrade) override;
 

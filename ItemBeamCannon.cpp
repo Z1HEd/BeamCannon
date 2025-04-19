@@ -6,10 +6,8 @@ using namespace fdm;
 using namespace hypercore;
 
 MeshRenderer ItemBeamCannon::renderer = {};
-std::string ItemBeamCannon::fuelFlushSound = "";
-//TODO: when 4D modding 2.2 adds SoLoud headers, make a proper sound for lazer
 std::string ItemBeamCannon::laserSound = "";
-
+SoLoud::handle laserSoundHandle;
 
 bool ItemBeamCannon::isCompatible(const std::unique_ptr<Item>& other)
 {
@@ -31,15 +29,16 @@ uint32_t ItemBeamCannon::getStackLimit() {
 void ItemBeamCannon::resetUpgrades() {
 	hasGlassesEffect = false;
 	hasCompassEffect = false;
-	effectiveDistance = 15;
+	hasMagnetEffect = false;
+	effectiveDistance = 10;
 	entityDamage = 10;
-	diggingPower = 3;
+	diggingPower = 2.5;
+	diggingArea = 1;
 	fuelUsage = 0.01f;
-	effectArea = 0.0f;
 }
 void ItemBeamCannon::applyUpgrades() {
 	for (unsigned int i = 0;i < inventory.getSlotCount(); i++) {
-		if (auto* upgrade = dynamic_cast<BeamCannonUpgrade*>(inventory.getSlot(i)->get()))
+		if (auto* upgrade = dynamic_cast<BeamCannonUpgrade*>(inventory.getSlot(i).get()))
 			upgrade->applyUpgrade(this);
 	}
 }
@@ -51,7 +50,7 @@ void ItemBeamCannon::reloadUpgrades() {
 int ItemBeamCannon::getSelectedFuelCount(InventoryPlayer& inventory) {
 	int count = 0;
 	for (unsigned int slot = 0;slot < inventory.getSlotCount(); slot++) {
-		Item* i = inventory.getSlot(slot)->get();
+		Item* i = inventory.getSlot(slot).get();
 		if (i != nullptr && i->getName() == (isSelectedFuelDeadly ? "Deadly Fuel" : "Biofuel"))
 			count += i->count;
 
@@ -60,10 +59,10 @@ int ItemBeamCannon::getSelectedFuelCount(InventoryPlayer& inventory) {
 }
 void ItemBeamCannon::consumeSelectedFuel(InventoryPlayer& inventory) {
 	for (unsigned int slot = 0;slot < inventory.getSlotCount(); slot++) {
-		Item* i = inventory.getSlot(slot)->get();
+		Item* i = inventory.getSlot(slot).get();
 		if (i != nullptr && i->getName() == (isSelectedFuelDeadly ? "Deadly Fuel" : "Biofuel")) {
 			i->count--;
-			if (i->count < 1) inventory.getSlot(slot)->reset();
+			if (i->count < 1) inventory.getSlot(slot).reset();
 			fuelLevel = 1.0f;
 			isFuelDeadly = isSelectedFuelDeadly;
 			return;
@@ -84,82 +83,101 @@ void ItemBeamCannon::rendererInit() {
 	renderer.setMesh(&mesh);
 }
 
-static void destroyBlock(World* world,const glm::ivec4& blockPos) {
-	EntityController::spawnEntityItem(world,BlockInfo::blockNames->find(world->getBlock(blockPos))->second, glm::vec4 { 0.5 }+ glm::vec4(blockPos));
+void ItemBeamCannon::destroyBlock(World* world, const glm::ivec4& blockPos, const glm::vec4& dropPos) {
+	// Lets not mine air and barriers pls ty
+	uint8_t blockId = world->getBlock(blockPos);
+	if (blockId < BlockInfo::VISIBLE_BLOCK_START || blockId >= BlockInfo::VISIBLE_BLOCK_END) return;
+
+	EntityController::spawnEntityItem(world, BlockInfo::blockNames.find(blockId)->second, dropPos);
+	
+
 	world->setBlockUpdate(blockPos, BlockInfo::TYPE::AIR);
 }
+void ItemBeamCannon::destroyArea(World* world, const glm::ivec4& centerPos,const int& size) {
+	for (int x = 1-size;x < size; x++)
+		for (int y = 1 - size;y < size; y++)
+			for (int z = 1 - size;z < size; z++)
+				for (int w = 1 - size;w < size; w++)
+					if (!hasMagnetEffect)
+						destroyBlock(StateGame::instanceObj.world.get(), centerPos+glm::ivec4{x,y,z,w}, glm::vec4{ x + 0.5,1.5 - size,z + 0.5,w + 0.5 }+glm::vec4( centerPos) );
+					else
+						destroyBlock(StateGame::instanceObj.world.get(), centerPos + glm::ivec4{ x,y,z,w }, StateGame::instanceObj.player.pos);
+}
 
-void ItemBeamCannon::tryShooting(Player* player,double dt) {
-	static float timeSinceLastLazerSound = 0;
+bool ItemBeamCannon::tryShooting(Player* player,double dt) {
 
-	static double timeSinceLastTick = 0;
-	constexpr double timeBetweenTicks = 0.05; // 20 ticks per second
-	timeSinceLastTick += dt;
-	timeSinceLastLazerSound += dt;
+	if (fuelLevel <= 0.0f) consumeSelectedFuel(player->inventoryAndEquipment);
+	if (fuelLevel <= 0.0f) return false;
 
-	if (timeSinceLastLazerSound >= 0.5f) {
-		timeSinceLastLazerSound = 0;
-		AudioManager::playSound4D(laserSound, "ambience", player->cameraPos, player->vel);
-	}
-
-	if (timeSinceLastTick < timeBetweenTicks) return;
-
-	if (isFlushing && fuelLevel > 0.0f) {
-		AudioManager::playSound4D(fuelFlushSound, "ambience", player->cameraPos, player->vel);
-		fuelLevel = 0.0f;
-	}
-
-	if (fuelLevel <= 0.0f && player->touchingGround && !isFlushing) consumeSelectedFuel(player->inventoryAndEquipment);
-
-	//fuelLevel -= fuelUsage;
+	fuelLevel -= fuelUsage* (isFuelDeadly? 1:1.5);
 
 	timeSinceLastTick = 0;
 
 	glm::vec4 reachStartpoint = player->cameraPos;
 	glm::vec4 reachEndpoint = player->cameraPos + player->forward * effectiveDistance;
 
-	Entity* intersect = StateGame::instanceObj->world->getEntityIntersection(reachStartpoint, reachEndpoint, player->EntityPlayerID);
+	Entity* intersect = StateGame::instanceObj.world->getEntityIntersection(reachStartpoint, reachEndpoint, player->EntityPlayerID);
 
 	glm::ivec4 blockPos = reachStartpoint;
 	glm::ivec4 endPos;
 	static glm::ivec4 prevPos = {};
 	static float destroyProgress = 0;
 	if (intersect != nullptr) {
-		intersect->takeDamage(entityDamage, StateGame::instanceObj->world.get());
-		return;
+		intersect->takeDamage(entityDamage, StateGame::instanceObj.world.get());
+		
 	}
-	else if (StateGame::instanceObj->world->castRay(reachStartpoint, blockPos, endPos, reachEndpoint)) {
+	else if (StateGame::instanceObj.world->castRay(reachStartpoint, blockPos, endPos, reachEndpoint)) {
 		if (prevPos != endPos)
 			destroyProgress = 0;
 		destroyProgress += diggingPower / 20.0;
+
 		if (destroyProgress >= 1) {
-			destroyBlock(StateGame::instanceObj->world.get(), endPos);
+			destroyArea(StateGame::instanceObj.world.get(), endPos, diggingArea);
 			destroyProgress = 0;
 		}
 		prevPos = endPos;
 	}
-
+	return true;
 }
 
 void ItemBeamCannon::update(Player* player,double dt) {
-	if (player->keys.rightMouseDown)
-		tryShooting(player, dt);
+	constexpr double timeBetweenTicks = 0.05; // 20 ticks per second
+	timeSinceLastTick += dt;
+	if (!player->keys.leftMouseDown) {
+		AudioManager::soloud.setPause(laserSoundHandle, true);
+		return;
+	}
+	if(timeSinceLastTick >= timeBetweenTicks) {
+		AudioManager::soloud.setPause(laserSoundHandle, !tryShooting(player, dt));
+		timeSinceLastTick = 0;
+	}
 }
 
 $hook(void, Player, update, World* world, double _, EntityPlayer* entityPlayer) { // dt is useless bcs its hardcoded to 0.01
 	original(self, world, _, entityPlayer);
 
 	ItemBeamCannon* cannon;
-	cannon = dynamic_cast<ItemBeamCannon*>(self->hotbar.getSlot(self->hotbar.selectedIndex)->get());
-	if (!cannon) cannon = dynamic_cast<ItemBeamCannon*>(self->equipment.getSlot(0)->get());
-	if (!cannon) return;
+	cannon = dynamic_cast<ItemBeamCannon*>(self->hotbar.getSlot(self->hotbar.selectedIndex).get());
+	if (!cannon) cannon = dynamic_cast<ItemBeamCannon*>(self->equipment.getSlot(0).get());
+	if (!cannon) {
+		AudioManager::soloud.setPause(laserSoundHandle, true);
+		return;
+	}
 
 	static double lastTime = glfwGetTime() - 0.01;
 	double curTime = glfwGetTime();
 	double dt = curTime - lastTime;
 	lastTime = curTime;
 
-	cannon->update(self, dt);
+	if (!self->inventoryManager.isOpen())
+		cannon->update(self, dt);
+}
+
+$hook(void, StateGame, init, StateManager& s) {
+	original(self, s);
+	laserSoundHandle = AudioManager::playSound4D(ItemBeamCannon::laserSound, "ambience", self->player.pos, glm::vec4{0});
+	AudioManager::soloud.setLooping(laserSoundHandle, true);
+	AudioManager::soloud.setPause(laserSoundHandle, true);
 }
 
 void ItemBeamCannon::openInventory(Player* player) {
@@ -177,8 +195,8 @@ void ItemBeamCannon::openInventory(Player* player) {
 }
 
 void ItemBeamCannon::render(const glm::ivec2& pos) {
-	TexRenderer& tr = *ItemTool::tr; // or TexRenderer& tr = ItemTool::tr; after 4dmodding 2.2
-	FontRenderer& fr = *ItemMaterial::fr;
+	TexRenderer& tr = ItemTool::tr; // or TexRenderer& tr = ItemTool::tr; after 4dmodding 2.2
+	FontRenderer& fr = ItemMaterial::fr;
 
 	const Tex2D* ogTex = tr.texture; // remember the original texture
 
@@ -194,12 +212,12 @@ void ItemBeamCannon::render(const glm::ivec2& pos) {
 }
 
 float ItemBeamCannon::getLaserLength() {
-	Player* player = &StateGame::instanceObj->player;
+	Player* player = &StateGame::instanceObj.player;
 
 	glm::vec4 reachStartpoint = player->cameraPos;
 	glm::vec4 reachEndpoint = player->cameraPos + player->forward * effectiveDistance;
 
-	Entity* intersect = StateGame::instanceObj->world->getEntityIntersection(reachStartpoint, reachEndpoint, player->EntityPlayerID);
+	Entity* intersect = StateGame::instanceObj.world->getEntityIntersection(reachStartpoint, reachEndpoint, player->EntityPlayerID);
 
 	glm::ivec4 blockPos = reachStartpoint;
 	glm::ivec4 endPos;
@@ -209,15 +227,24 @@ float ItemBeamCannon::getLaserLength() {
 		return glm::length(reachEndpoint - reachStartpoint);
 	}
 	else {
-		StateGame::instanceObj->world->castRay(reachStartpoint, blockPos, endPos, reachEndpoint);
+		StateGame::instanceObj.world->castRay(reachStartpoint, blockPos, endPos, reachEndpoint);
 		return effectiveDistance - glm::length(reachEndpoint - reachStartpoint);
 	}
 	
 }
 
+// Dont swing beamcannon
+$hook(void, Player, renderHud, GLFWwindow* window) {
+	ItemBeamCannon* beamCannon;
+	beamCannon = dynamic_cast<ItemBeamCannon*>(self->hotbar.getSlot(self->hotbar.selectedIndex).get());
+	if (beamCannon) self->mineAnimTheta = 0;
+	original(self, window);
+}
+
+
 void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::vec4& lightDir) {
 	
-	Player* player = &StateGame::instanceObj->player;
+	Player* player = &StateGame::instanceObj.player;
 
 	static double lastTime = glfwGetTime() - 0.01;
 	double curTime = glfwGetTime();
@@ -283,20 +310,6 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 	button1Mat.translate(glm::vec4{ 0.1f , -0.23f, 0.25f, 0.0f });
 	button1Mat.scale(glm::vec4{ 0.1f,.1f,0.05f,0.13f });
 	button1Mat.translate(glm::vec4{ -0.5f, -0.5f, -0.5f, -0.5f });
-
-
-	m4::Mat5 button2Mat = MV;
-	button2Mat.translate(glm::vec4{ 0.0f, .8f, -0.5f, 0.001f });
-	button2Mat *= m4::Rotor
-	(
-		{
-			m4::wedge({0, 0, 1, 0}, {0, 1, 0, 0}), // ZY
-			-glm::pi<float>() / 4
-		}
-	);
-	button2Mat.translate(glm::vec4{ -0.1f , -0.23f, 0.25f, 0.0f });
-	button2Mat.scale(glm::vec4{ 0.1f,.1f,0.05f,0.13f });
-	button2Mat.translate(glm::vec4{ -0.5f, -0.5f, -0.5f, -0.5f });
 
 	m4::Mat5 fuelMat = MV;
 	fuelMat.translate(glm::vec4{ 0.0f, .8f, -0.5f, 0.001f });
@@ -382,10 +395,10 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 	glUniform4f(glGetUniformLocation(shader->id(), "lightDir"), lightDir.x, lightDir.y, lightDir.z, lightDir.w);
 
 	//LASER COLOR
-	glUniform4f(glGetUniformLocation(shader->id(), "inColor"), .8, .8, .8, 1);
+	glUniform4f(glGetUniformLocation(shader->id(), "inColor"), .8f, .8f, .8f, 1);
 
 	glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(laserMat) / sizeof(float), &laserMat[0][0]);
-	if (player->keys.rightMouseDown && fuelLevel>0)
+	if (player->keys.leftMouseDown && fuelLevel>0)
 		renderer.render();
 
 	//IRON COLOR
@@ -414,21 +427,12 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 		glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(button1Mat) / sizeof(float), &button1Mat[0][0]);
 		renderer.render();
 	}
-	if (!isFlushing) {
-		glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(button2Mat) / sizeof(float), &button2Mat[0][0]);
-		renderer.render();
-	}
-
 	// HIGHLIGHTED SOLENOID COLOR
 
 	glUniform4f(glGetUniformLocation(shader->id(), "inColor"), 59.0f / 255.f, 224.0f / 255.f, 110.0f / 255.f, 1);
 
 	if (player->keys.rightMouseDown) {
 		glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(button1Mat) / sizeof(float), &button1Mat[0][0]);
-		renderer.render();
-	}
-	if (isFlushing) {
-		glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(button2Mat) / sizeof(float), &button2Mat[0][0]);
 		renderer.render();
 	}
 	// FUEL INDICATOR
@@ -441,29 +445,29 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 	
 	// LENSES
 
-	const Shader* slingshotShader = ShaderManager::get("projectileShader");
+	const Shader* slingshotShader = ShaderManager::get("lensShader");
 
 	slingshotShader->use();
 
 	glUniform4f(glGetUniformLocation(slingshotShader->id(), "lightDir"), 0, 1, 0, 0);
 
-	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), 1, 0, 0, 0.7);
+	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), 1, 0, 0, 0.7f);
 	glUniform1fv(glGetUniformLocation(slingshotShader->id(), "MV"), sizeof(lensRedMat) / sizeof(float), &lensRedMat[0][0]);
-	ItemTool::rockRenderer->render();
+	ItemTool::rockRenderer.render();
 
-	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), 0, 1, 0, 0.7);
+	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), 0, 1, 0, 0.7f);
 	glUniform1fv(glGetUniformLocation(slingshotShader->id(), "MV"), sizeof(lensGreenMat) / sizeof(float), &lensGreenMat[0][0]);
-	ItemTool::rockRenderer->render();
+	ItemTool::rockRenderer.render();
 
-	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), 0, 0, 1, 0.7);
+	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), 0, 0, 1, 0.7f);
 	glUniform1fv(glGetUniformLocation(slingshotShader->id(), "MV"), sizeof(lensBlueMat) / sizeof(float), &lensBlueMat[0][0]);
-	ItemTool::rockRenderer->render();
+	ItemTool::rockRenderer.render();
 
 	// LASER POINT
-	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), .8, .8, .8, 1);
+	glUniform4f(glGetUniformLocation(slingshotShader->id(), "inColor"), .8f, .8f, .8f, 1);
 	glUniform1fv(glGetUniformLocation(slingshotShader->id(), "MV"), sizeof(laserPointMat) / sizeof(float), &laserPointMat[0][0]);
-	if (player->keys.rightMouseDown && fuelLevel > 0 && laserLength<effectiveDistance*7.5)
-		ItemTool::rockRenderer->render();
+	if (player->keys.leftMouseDown && fuelLevel > 0 && laserLength<effectiveDistance*7.5)
+		ItemTool::rockRenderer.render();
 
 	// COMPASS UI
 
@@ -472,7 +476,7 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 }
 
 nlohmann::json ItemBeamCannon::saveAttributes() {
-	return {{ "inventory", inventory.save()},{ "fuelLevel", fuelLevel }, { "isFuelDeadly", isFuelDeadly}, { "isSelectedFuelDeadly", isSelectedFuelDeadly} };
+	return { { "fuelLevel", fuelLevel },{ "inventory", inventory.save()}, { "isFuelDeadly", isFuelDeadly}, { "isSelectedFuelDeadly", isSelectedFuelDeadly} };
 }
 
 // Cloning item
@@ -495,7 +499,7 @@ $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& ite
 
 	auto result = std::make_unique<ItemBeamCannon>();
 	
-	result->inventory = InventoryGrid({ 2,3 });
+	result->inventory = InventoryGrid({ 3,3 });
 	result->inventory.load(attributes["inventory"]);
 	result->inventory.name = "beamCannonInventory";
 	result->inventory.label = "Beam Cannon Upgrades:";
@@ -515,8 +519,8 @@ $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& ite
 // Glasses/Compass effect
 $hook(bool, Player, isHoldingGlasses) {
 	ItemBeamCannon* beamCannon;
-	beamCannon = dynamic_cast<ItemBeamCannon*>(self->hotbar.getSlot(self->hotbar.selectedIndex)->get());
-	if (!beamCannon) beamCannon = dynamic_cast<ItemBeamCannon*>(self->equipment.getSlot(0)->get());
+	beamCannon = dynamic_cast<ItemBeamCannon*>(self->hotbar.getSlot(self->hotbar.selectedIndex).get());
+	if (!beamCannon) beamCannon = dynamic_cast<ItemBeamCannon*>(self->equipment.getSlot(0).get());
 	if (!beamCannon) return original(self);
 	return original(self) || beamCannon->hasGlassesEffect;
 }

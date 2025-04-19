@@ -1,24 +1,26 @@
-#include "GyroscopeUpgrade.h"
+#include "ConcentratorUpgrade.h"
 
-void GyroscopeUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
-	beamCannon->hasCompassEffect = true;
+void ConcentratorUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
+	beamCannon->effectiveDistance *= 4;
+	beamCannon->entityDamage *= 0.75;
+	beamCannon->diggingPower *= 0.75;
 }
 
-bool GyroscopeUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
-	return dynamic_cast<GyroscopeUpgrade*>(upgrade) == nullptr; // Can only apply once
+bool ConcentratorUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
+	return true;
 }
 
-bool GyroscopeUpgrade::isCompatible(const std::unique_ptr<Item>& other)
+bool ConcentratorUpgrade::isCompatible(const std::unique_ptr<Item>& other)
 {
-	return dynamic_cast<GyroscopeUpgrade*>(other.get());
+	return dynamic_cast<ConcentratorUpgrade*>(other.get());
 }
 
-stl::string GyroscopeUpgrade::getName() {
-	return "Gyroscope Upgrade";
+stl::string ConcentratorUpgrade::getName() {
+	return "Concentrator Upgrade";
 }
 
-std::unique_ptr<Item> GyroscopeUpgrade::clone() {
-	auto result = std::make_unique<GyroscopeUpgrade>();
+std::unique_ptr<Item> ConcentratorUpgrade::clone() {
+	auto result = std::make_unique<ConcentratorUpgrade>();
 
 	return result;
 }

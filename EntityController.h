@@ -7,10 +7,8 @@ namespace hypercore {
 	class EntityController {
 	public:
 		inline static void spawnEntity(World* world, std::unique_ptr<Entity>& entity) {
-			static glm::vec4 entityPos;
-			static Chunk* chunk;
-			entityPos = entity->getPos();
-			chunk = world->getChunkFromCoords(entityPos.x, entityPos.z, entityPos.w);
+			glm::vec4 entityPos = entity->getPos();
+			Chunk*  chunk = world->getChunkFromCoords(entityPos.x, entityPos.z, entityPos.w);
 			if (chunk) world->addEntityToChunk(entity, chunk);
 		}
 
@@ -18,6 +16,7 @@ namespace hypercore {
 			std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
 				std::move(item), position, {}
 			);
+			((EntityItem*)spawnedEntity.get())->combineWithNearby(world);
 			spawnEntity(world, spawnedEntity);
 		}
 
@@ -25,6 +24,7 @@ namespace hypercore {
 			std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
 				std::move(item), position, velocity
 			);
+			((EntityItem*)spawnedEntity.get())->combineWithNearby(world);
 			spawnEntity(world, spawnedEntity);
 		}
 
@@ -32,6 +32,7 @@ namespace hypercore {
 			std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
 				Item::create(itemName, 1), position, {}
 			);
+			((EntityItem*)spawnedEntity.get())->combineWithNearby(world);
 			spawnEntity(world, spawnedEntity);
 		}
 
@@ -39,6 +40,7 @@ namespace hypercore {
 			std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
 				Item::create(itemName, 1), position, velocity
 			);
+			((EntityItem*)spawnedEntity.get())->combineWithNearby(world);
 			spawnEntity(world, spawnedEntity);
 		}
 
@@ -46,6 +48,7 @@ namespace hypercore {
 			std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
 				Item::create(itemName, count), position, {}
 			);
+			((EntityItem*)spawnedEntity.get())->combineWithNearby(world);
 			spawnEntity(world, spawnedEntity);
 		}
 
@@ -53,6 +56,7 @@ namespace hypercore {
 			std::unique_ptr<Entity> spawnedEntity = EntityItem::createWithItem(
 				Item::create(itemName, count), position, velocity
 			);
+			((EntityItem*)spawnedEntity.get())->combineWithNearby(world);
 			spawnEntity(world, spawnedEntity);
 		}
 	};

@@ -1,23 +1,24 @@
-#include "OpticsUpgrade.h"
+#include "AreaUpgrade.h"
 
-void OpticsUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
-	beamCannon->hasGlassesEffect = true;
+void AreaUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
+	beamCannon->diggingArea += 1;
+	beamCannon->diggingPower /= 3.5;
 }
 
-bool OpticsUpgrade::isCompatible(const std::unique_ptr<Item>& other)
+bool AreaUpgrade::isCompatible(const std::unique_ptr<Item>& other)
 {
-	return dynamic_cast<OpticsUpgrade*>(other.get());
+	return dynamic_cast<AreaUpgrade*>(other.get());
 }
-bool OpticsUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
-	return dynamic_cast<OpticsUpgrade*>(upgrade) == nullptr; // Can only apply once
-}
-
-stl::string OpticsUpgrade::getName() {
-	return "4D Optics Upgrade";
+bool AreaUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
+	return true;
 }
 
-std::unique_ptr<Item> OpticsUpgrade::clone() {
-	auto result = std::make_unique<OpticsUpgrade>();
+stl::string AreaUpgrade::getName() {
+	return "Area Upgrade";
+}
+
+std::unique_ptr<Item> AreaUpgrade::clone() {
+	auto result = std::make_unique<AreaUpgrade>();
 
 	return result;
 }

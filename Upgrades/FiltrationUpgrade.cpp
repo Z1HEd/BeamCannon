@@ -1,23 +1,23 @@
-#include "OpticsUpgrade.h"
+#include "FiltrationUpgrade.h"
 
-void OpticsUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
-	beamCannon->hasGlassesEffect = true;
+void FiltrationUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
+	beamCannon->fuelUsage /= 3;
 }
 
-bool OpticsUpgrade::isCompatible(const std::unique_ptr<Item>& other)
+bool FiltrationUpgrade::isCompatible(const std::unique_ptr<Item>& other)
 {
-	return dynamic_cast<OpticsUpgrade*>(other.get());
+	return dynamic_cast<FiltrationUpgrade*>(other.get());
 }
-bool OpticsUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
-	return dynamic_cast<OpticsUpgrade*>(upgrade) == nullptr; // Can only apply once
-}
-
-stl::string OpticsUpgrade::getName() {
-	return "4D Optics Upgrade";
+bool FiltrationUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
+	return true;
 }
 
-std::unique_ptr<Item> OpticsUpgrade::clone() {
-	auto result = std::make_unique<OpticsUpgrade>();
+stl::string FiltrationUpgrade::getName() {
+	return "Filtration Upgrade";
+}
+
+std::unique_ptr<Item> FiltrationUpgrade::clone() {
+	auto result = std::make_unique<FiltrationUpgrade>();
 
 	return result;
 }

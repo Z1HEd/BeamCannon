@@ -1,24 +1,26 @@
-#include "GyroscopeUpgrade.h"
+#include "MatterDisassemblerUpgrade.h"
 
-void GyroscopeUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
-	beamCannon->hasCompassEffect = true;
+void MatterDisassemblerUpgrade::applyUpgrade(ItemBeamCannon* beamCannon) {
+	beamCannon->diggingPower *= 3;
+	beamCannon->entityDamage *= 0.75;
+	beamCannon->fuelUsage *= 2;
 }
 
-bool GyroscopeUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
-	return dynamic_cast<GyroscopeUpgrade*>(upgrade) == nullptr; // Can only apply once
+bool MatterDisassemblerUpgrade::isCompatibleUpgrade(BeamCannonUpgrade* upgrade) {
+	return true;
 }
 
-bool GyroscopeUpgrade::isCompatible(const std::unique_ptr<Item>& other)
+bool MatterDisassemblerUpgrade::isCompatible(const std::unique_ptr<Item>& other)
 {
-	return dynamic_cast<GyroscopeUpgrade*>(other.get());
+	return dynamic_cast<MatterDisassemblerUpgrade*>(other.get());
 }
 
-stl::string GyroscopeUpgrade::getName() {
-	return "Gyroscope Upgrade";
+stl::string MatterDisassemblerUpgrade::getName() {
+	return "Matter Disassembler Upgrade";
 }
 
-std::unique_ptr<Item> GyroscopeUpgrade::clone() {
-	auto result = std::make_unique<GyroscopeUpgrade>();
+std::unique_ptr<Item> MatterDisassemblerUpgrade::clone() {
+	auto result = std::make_unique<MatterDisassemblerUpgrade>();
 
 	return result;
 }

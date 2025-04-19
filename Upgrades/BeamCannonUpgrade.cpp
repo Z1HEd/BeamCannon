@@ -1,6 +1,12 @@
 #include "BeamCannonUpgrade.h"
 #include "OpticsUpgrade.h"
 #include "GyroscopeUpgrade.h"
+#include "ConcentratorUpgrade.h"
+#include "CoilsUpgrade.h"
+#include "FiltrationUpgrade.h"
+#include "MagnetUpgrade.h"
+#include "MatterDisassemblerUpgrade.h"
+#include "AreaUpgrade.h"
 
 bool BeamCannonUpgrade::isDeadly() {
 	return false;
@@ -25,8 +31,8 @@ bool BeamCannonUpgrade::canBePutInto(InventoryGrid* inventory) {
 }
 
 void BeamCannonUpgrade::render(const glm::ivec2& pos) {
-	TexRenderer& tr = *ItemTool::tr; // or TexRenderer& tr = ItemTool::tr; after 4dmodding 2.2
-	FontRenderer& fr = *ItemMaterial::fr;
+	TexRenderer& tr = ItemTool::tr; // or TexRenderer& tr = ItemTool::tr; after 4dmodding 2.2
+	FontRenderer& fr = ItemMaterial::fr;
 
 	const Tex2D* ogTex = tr.texture; // remember the original texture
 
@@ -53,6 +59,20 @@ $hookStatic(std::unique_ptr<Item>, Item, instantiateItem, const stl::string& ite
 		result = std::make_unique<OpticsUpgrade>();
 	else if (itemName == "Gyroscope Upgrade")
 		result = std::make_unique<GyroscopeUpgrade>();
+	else if (itemName == "Concentrator Upgrade")
+		result = std::make_unique<ConcentratorUpgrade>();
+	else if (itemName == "Coils Upgrade")
+		result = std::make_unique<CoilsUpgrade>();
+	else if (itemName == "Filtration Upgrade")
+		result = std::make_unique<FiltrationUpgrade>();
+	else if (itemName == "Magnet Upgrade")
+		result = std::make_unique<MagnetUpgrade>();
+	else if (itemName == "Area Upgrade")
+		result = std::make_unique<AreaUpgrade>();
+	else if (itemName == "Matter Disassembler Upgrade")
+		result = std::make_unique<MatterDisassemblerUpgrade>();
+
+	result->count = 1;
 
 	return result;
 }
