@@ -298,19 +298,6 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 	buttMat.scale(glm::vec4{ 0.4f,1.5f,0.4f,0.4f });
 	buttMat.translate(glm::vec4{ -0.5f, -0.5f, -0.5f, -0.5f });
 
-	m4::Mat5 button1Mat = MV;
-	button1Mat.translate(glm::vec4{ 0.0f, .8f, -0.5f, 0.001f });
-	button1Mat *= m4::Rotor
-	(
-		{
-			m4::wedge({0, 0, 1, 0}, {0, 1, 0, 0}), // ZY
-			-glm::pi<float>() / 4
-		}
-	);
-	button1Mat.translate(glm::vec4{ 0.1f , -0.23f, 0.25f, 0.0f });
-	button1Mat.scale(glm::vec4{ 0.1f,.1f,0.05f,0.13f });
-	button1Mat.translate(glm::vec4{ -0.5f, -0.5f, -0.5f, -0.5f });
-
 	m4::Mat5 fuelMat = MV;
 	fuelMat.translate(glm::vec4{ 0.0f, .8f, -0.5f, 0.001f });
 	fuelMat *= m4::Rotor
@@ -420,21 +407,6 @@ void ItemBeamCannon::renderEntity(const m4::Mat5& MV, bool inHand, const glm::ve
 	glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(lowerLensHolderMat) / sizeof(float), &lowerLensHolderMat[0][0]);
 	renderer.render();
 
-	// SOLENOID COLOR
-	glUniform4f(glGetUniformLocation(shader->id(), "inColor"), 59.0f / 255.f, 180.0f / 255.f, 110.0f / 255.f, 1);
-
-	if (!player->keys.rightMouseDown) {
-		glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(button1Mat) / sizeof(float), &button1Mat[0][0]);
-		renderer.render();
-	}
-	// HIGHLIGHTED SOLENOID COLOR
-
-	glUniform4f(glGetUniformLocation(shader->id(), "inColor"), 59.0f / 255.f, 224.0f / 255.f, 110.0f / 255.f, 1);
-
-	if (player->keys.rightMouseDown) {
-		glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(button1Mat) / sizeof(float), &button1Mat[0][0]);
-		renderer.render();
-	}
 	// FUEL INDICATOR
 	glUniform4f(glGetUniformLocation(shader->id(), "inColor"), fuelColor.r, fuelColor.g, fuelColor.b, 1);
 	glUniform1fv(glGetUniformLocation(shader->id(), "MV"), sizeof(fuelMat) / sizeof(float), &fuelMat[0][0]);

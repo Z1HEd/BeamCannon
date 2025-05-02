@@ -1,0 +1,25 @@
+Beam Cannon [WORK IN PROGRESS]
+This mod adds a new tool: Beam Cannon. It uses fuel to shoot a laser that destroys blocks and kills entities on its way.
+It accepts two types of fuel: Biofuel and Deadly fuel (compatible with jetpack mod).
+Press LMB to shoot a laser, RMB to switch selected fuel type, shift+RMB to open Beam Cannon upgrades inventory.
+Put upgrades into a beamcannon to modify its characteristics, such as entity damage, digging speed, digging area or range.
+Full list of added items and its recipes:
+Biofuel: 1 Klein Bottle, 3 Leafs, 1 Wood
+Deadly fuel: 1 Klein Bottle, 1 Deadly ore
+Deadly Casing: 4 Deadly Bars
+Iron Plate: 3 Iron Bars
+Solenoid Wire: 2 Solenoid Bars
+Gyroscope: 2 Iron Bars, 1 Compass
+Beam Concentrator: 1 Iron Plate, 1 of each type of flawless lens
+Beam Cannon: 1 Beam Concentrator, 2 Deadly Casing, 2 Iron Plate, 3 Solenoid Wire
+4D Optics Upgrade: 2 Iron Plate, 1 4D Glasses - Adds a 4D glasses effect when holding a Beam Cannon
+Gyroscope Upgrade: 2 Iron Plate, 1 Gyroscope - Adds a compass effect when holding a Beam Cannon
+Area Upgrade: 2 Iron Plate, 1 Ultrahammer - Increases mining area, significantly decreases digging power
+Concentrator Upgrade: 2 Iron Plate, 1 Beam Concentrator - Increases range, slightly decreases damage and digging power
+Coils Upgrade: 2 Iron Plate, 2 Solenoid Wire - Increases damage and fuel usage, slightly decreases range
+Filtration Upgrade: 2 Iron Plate, 20 Sand, 5 Klein Bottle - Decreases fuel usage
+Matter Disassembler Upgrade: 2 Iron Plate, 1 Deadly Pick - Significantly increases digging power and fuel usage, slightly decreases damage
+Magnet Upgrade: 2 Iron Plate, 1 Solenoid Collector - All mined blocks are automatically gathered
+
+Cannot apply more than 9 upgrades to a Beam Cannon. Optics and gyroscope upgrades can only be applied once. Upgrades can only be crafed in the Beam Cannon upgrades inventory. 
+Take a lens in one hand, rock into another, and press RMB to to chip the excess parts of the lens and make it flawless. You might accidentally break a couple lenses in the process.

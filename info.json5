@@ -2,13 +2,13 @@
   id: "zihed.beamcannon",
   name: "Beam Cannon",
   author: "ZiHEd",
-  description: "Beam Cannon",
-  version: "1.0",
+  descriptionFile: "description.txt",
+  version: "0.1 Alpha",
   gameVersion: "0.2.1.4",
   modDLL: "4DMod.dll",
   externalDLLs: [
   ],
   dependencies: {
-  "zihed.jetpackmod": "? before" // Will be like that until i add hypercore to jetpackmod, or till i merge them lol
+  "zihed.jetpackmod": "? before" // Will be like that until i add proper recipe handling to jetpackmod, or till i merge them lol
   },
 }

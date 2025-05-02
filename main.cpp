@@ -219,16 +219,18 @@ $hook(void, Player, renderHud, GLFWwindow* window) {
 void chipLens(std::unique_ptr<Item>& lens, Player* player, World* world)
 {
 	lens->count--;
-	if (lens->count == 0) lens.release();
+	
 
-	if (rand() % 3 != 0) {
+	if (rand() % 2 != 0) {
 		AudioManager::playSound4D(chippingSoundFail, "ambience", player->cameraPos, player->vel);
+		if (lens->count == 0) lens.release();
 		return;
 	}
 
 	AudioManager::playSound4D(chippingSoundSuccess, "ambience", player->cameraPos, player->vel);
 
 	EntityController::spawnEntityItem(world, std::string("Flawless ") + lens->getName().c_str(), player->cameraPos, player->vel);
+	if (lens->count == 0) lens.release();
 }
 $hook(void, Player, mouseButtonInput, GLFWwindow* window, World* world, int button, int action, int mods) {
 
@@ -352,6 +354,7 @@ void addRecipe(const std::string& resultName, int resultCount,
 void InitRecipes() {
 
 	addRecipe("Klein Bottle", 1, { {"Glass",3} });
+	addRecipe("Biofuel", 1, { {"Klein Bottle",1},{"Leaf",3},{"Wood",1} });
 	addRecipe("Deadly Fuel", 1, { {"Klein Bottle",1},{"Deadly Ore",1}});
 
 	addRecipe("Deadly Casing", 1, { {"Deadly Bars",4} });

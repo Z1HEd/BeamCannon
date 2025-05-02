@@ -51,9 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="info.json5" />
-    <None Include="postbuild.bat">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ItemBeamCannon.h">

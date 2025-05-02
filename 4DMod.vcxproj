@@ -113,7 +113,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="info.json5" />
-    <None Include="postbuild.bat" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="4DKeyBinds.h" />
